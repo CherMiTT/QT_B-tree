@@ -92,7 +92,7 @@ void Tree::addElement(int e) //добавить элемнент в дерево
                     }
                     if (ptr->elementsCount - 1 == i && e > ptr->elements[i]) //если нет следующего элемента в странице, а новый элемент больше последнего
                     {
-                        ptr = ptr->arrPDescendants[i+1]; //тогда переходим к самому последнему потомку
+                        ptr = ptr->arrPDescendants[ptr->descendantsCount - 1]; //тогда переходим к самому последнему потомку
                         qDebug(logDebug()) << "Переходим на " << ptr->formElementsToString();
                         break;
                     }
@@ -250,7 +250,6 @@ void Tree::repaintTree(TreePage *pPage, int x, int y)
     if(pPage == nullptr) return;
 
     QString str = pPage->formElementsToString();
-    int leftmostX;
 
     if(pPage->pParentPage == nullptr)
     {
