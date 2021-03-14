@@ -11,19 +11,22 @@ class Tree : public QWidget //синглтон
 
 private:
 
-    int elmentCount; //число элементов
+    int elementCount; //число элементов
+
     int n; //порядок дерева
     static Tree *pTree; //указатель на дескриптор
     TreePage *root; //указатель на корневой элемент
 
     explicit Tree(QWidget *parent = nullptr, int order = 1);
     ~Tree();
-    void repaintTree(TreePage*, int);
+
+    void repaintTree(TreePage*, int, int);
 
     void deletePage(TreePage*); //используется в деструкторе
-    void addElementToPage(int, TreePage*); //добавление элемента на страницу
+    int addElementToPage(int, TreePage*); //добавление элемента на страницу, возвращает индекс элемента на странице
     void restoreTree(TreePage*); //восстанавливает свойство дерева, если на какой-то странице больше 2n элементов
 
+    void recountNeededSpace(TreePage* ptr);
 public:
     QGraphicsScene *scene;
 
