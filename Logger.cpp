@@ -1,5 +1,7 @@
 #include "Logger.h"
 
+
+
 Q_LOGGING_CATEGORY(logDebug,    "Debug")
 Q_LOGGING_CATEGORY(logInfo,     "Info")
 Q_LOGGING_CATEGORY(logWarning,  "Warning")
