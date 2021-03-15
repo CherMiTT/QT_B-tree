@@ -268,9 +268,56 @@ void Tree::orderChanged(int newOrder)
 
 }
 
-void Tree::searchForElement(int e)
+TreePage* Tree::searchForElement(int e)
 {
+    qInfo(logInfo()) << "Ищем элемент " + QString::number(e) << ".";
 
+    if(root == nullptr)
+    {
+        qInfo(logInfo()) << "Дерево ещё не создано. Элемента нет.";
+        return nullptr;
+    }
+
+    TreePage* result = recursiveSearch(root, e);
+    if(result == nullptr)
+    {
+        qInfo(logInfo()) << "Элемент не найден.";
+    }
+    else
+    {
+        qInfo(logInfo()) << "Элемент найден на странице" << result->formElementsToString() << ".";
+    }
+    return result;
+}
+
+TreePage* Tree::recursiveSearch(TreePage* ptr, int e)
+{
+    qInfo(logInfo()) << "Просматриваем страницу" << ptr->formElementsToString() << ".";
+    if(ptr->descendantsCount != 0) //если просматриваем не лист
+    {
+        qInfo(logInfo()) << "Это не лист.";
+        for(int i = 0; i < ptr->elementsCount; i++)
+        {
+            if(e == ptr->elements[i]) return ptr;
+            if(e < ptr->elements[i])
+            {
+                return ptr->arrPDescendants[i] == nullptr ? nullptr : recursiveSearch(ptr->arrPDescendants[i], e);
+            }
+            if(i == ptr->elementsCount - 1)
+            {
+                return ptr->arrPDescendants[i + 1] == nullptr ? nullptr : recursiveSearch(ptr->arrPDescendants[i + 1], e);
+            }
+        }
+    }
+    else //если просматриваем лист
+    {
+        qInfo(logInfo()) << "Это лист.";
+        for(int i = 0; i < ptr->elementsCount; i++)
+        {
+            if(e == ptr->elements[i]) return ptr;
+        }
+        return nullptr;
+    }
 }
 
 void Tree::deleteElement(int e)

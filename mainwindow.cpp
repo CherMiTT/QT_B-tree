@@ -44,8 +44,8 @@ void MainWindow::addElementClicked()
 void MainWindow::searchElementClicked()
 {
     qInfo(logInfo()) << "Нажата кнопка поиска элемента.";
-    Tree *tree = Tree::getPTree();
-    tree->searchForElement(ui->searchElementField->text().toInt()); //TODO: добавить валидацию
+    Tree* tree = Tree::getPTree();
+    TreePage* result = tree->searchForElement(ui->searchElementField->text().toInt()); //TODO: добавить валидацию
 }
 
 void messageHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg) //обработчик сообщений в лог
