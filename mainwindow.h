@@ -23,6 +23,7 @@ private:
 
 private slots:
     void addElementClicked();
+    void searchElementClicked();
 
 };
 #endif // MAINWINDOW_H

@@ -19,6 +19,8 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
 
     connect(ui->addElementButton, &QPushButton::clicked, this, &MainWindow::addElementClicked);
+    connect(ui->searchElementButton, &QPushButton::clicked, this, &MainWindow::searchElementClicked);
+
     Tree *tree = Tree::getPTree(ui->treeOrderSpinBox->value());
     qInfo(logInfo()) << "Синглтон дерева успещно создан с порядком " + QString::number(ui->treeOrderSpinBox->value());
 
@@ -37,6 +39,13 @@ void MainWindow::addElementClicked()
     qInfo(logInfo()) << "Нажата кнопка добавить элемент.";
     Tree *tree = Tree::getPTree();
     tree->addElement(ui->addElementField->text().toInt()); //TODO: добавить валидацию
+}
+
+void MainWindow::searchElementClicked()
+{
+    qInfo(logInfo()) << "Нажата кнопка поиска элемента.";
+    Tree *tree = Tree::getPTree();
+    tree->searchForElement(ui->searchElementField->text().toInt()); //TODO: добавить валидацию
 }
 
 void messageHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg) //обработчик сообщений в лог
