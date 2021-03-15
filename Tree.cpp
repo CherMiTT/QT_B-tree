@@ -220,12 +220,12 @@ void Tree::restoreTree(TreePage *pPage) //восстанавливает сво�
 
     if(pPage->descendantsCount != 0) //если это не лист, то потомки тоже надо делить между страницами
     {
-        if(pPage->descendantsCount > n + 1)
+        if(pPage->descendantsCount > pPage->elementsCount + 1)
         {
             qInfo(logInfo()) << "Делим потомки страницы.";
-            for(int i = n + 2; i < 2 * n + 2; i++)
+            for(int i = pPage->elementsCount + 1; i < 2 * n + 2; i++)
             {
-                if(pPage->arrPDescendants[i] != nullptr) //TODO: как-то исправить тут сравнение
+                if(pPage->arrPDescendants[i] != nullptr)
                 {
                     for(int j = 0; j < newPage->elementsCount; j++)
                     {
@@ -237,6 +237,7 @@ void Tree::restoreTree(TreePage *pPage) //восстанавливает сво�
                             newPage->descendantsCount++;
                             pPage->descendantsCount--;
                             qInfo(logInfo()) << "Добавляем страницу " << newPage->arrPDescendants[j]->formElementsToString() << "как потомок страницы" << newPage->formElementsToString() << "с индексом" << j;
+                            break;
                         }
                         else if (j == newPage->elementsCount - 1)
                         {
@@ -245,16 +246,20 @@ void Tree::restoreTree(TreePage *pPage) //восстанавливает сво�
                             pPage->arrPDescendants[i] = nullptr;
                             newPage->descendantsCount++;
                             pPage->descendantsCount--;
-                            qInfo(logInfo()) << "Добавляем страницу " << newPage->arrPDescendants[j]->formElementsToString() << "как потомок страницы" << newPage->formElementsToString() << "с индексом" << j + 1;
+                            qInfo(logInfo()) << "Добавляем страницу !!" << newPage->arrPDescendants[j]->formElementsToString() << "как потомок страницы" << newPage->formElementsToString() << "с индексом" << j + 1;
+                            break;
                         }
                         else
                         {
                             newPage->descendantsCount++;
-                            newPage->arrPDescendants[j] = nullptr;
                             //qDebug(logCritical()) << "<= -> пропускаем, j = " << j;
                             continue;
                         }
                     }
+                }
+                else
+                {
+                    continue;
                 }
             }
         }
