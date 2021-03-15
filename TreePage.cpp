@@ -25,7 +25,7 @@ TreePage::TreePage(QWidget *parent, int order, TreePage *pParentPage) : QWidget(
 //TODO: исправить
 void TreePage::sort() //Сортировка пузырьком по возрастанию
 {
-    qInfo(logInfo()) << "Sorting elements on page " + formElementsToString();
+    qInfo(logInfo()) << "Сортируем элементы на странице" + formElementsToString();
     int tmp;
     for(int i = 0; i < elementsCount - 1; i++)
     {
@@ -41,7 +41,7 @@ void TreePage::sort() //Сортировка пузырьком по возра�
         }
 
     }
-    qInfo(logInfo()) << "Elements sorted. Resulting page: " + formElementsToString();
+    qInfo(logInfo()) << "лементы отсортированы. Результирующая страница: " + formElementsToString();
 }
 
 QString TreePage::formElementsToString() //возвращает строку с элементами страницы, разделёнными пробелами

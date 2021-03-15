@@ -15,12 +15,9 @@ private:
 
     int n; //порядок дерева
     static Tree *pTree; //указатель на дескриптор
-    TreePage *root; //указатель на корневой элемент
 
     explicit Tree(QWidget *parent = nullptr, int order = 1);
     ~Tree();
-
-    void repaintTree(TreePage*, int, int);
 
     void deletePage(TreePage*); //используется в деструкторе
     int addElementToPage(int, TreePage*); //добавление элемента на страницу, возвращает индекс элемента на странице
@@ -33,6 +30,11 @@ public:
     static Tree *getPTree(int order); //обновляет порядок дерева при его первоначальном создании
     static Tree *getPTree();
     friend class TreePage;
+
+    //TODO: сделать private
+    TreePage *root; //указатель на корневой элемент
+
+    void repaintTree(TreePage*, int, int);
 
 signals:
 

@@ -15,16 +15,16 @@ MainWindow::MainWindow(QWidget *parent)
 
     qInstallMessageHandler(messageHandler); //устанавливаем обработчик
 
-    qInfo(logInfo()) << "Application started, logger sucessfully set up";
+    qInfo(logInfo()) << "Приложение запущено, логгер успешно запущен.";
     ui->setupUi(this);
 
     connect(ui->addElementButton, &QPushButton::clicked, this, &MainWindow::addElementClicked);
     Tree *tree = Tree::getPTree(ui->treeOrderSpinBox->value());
-    qInfo(logInfo()) << "Tree singletone initialized with order " + QString::number(ui->treeOrderSpinBox->value());
+    qInfo(logInfo()) << "Синглтон дерева успещно создан с порядком " + QString::number(ui->treeOrderSpinBox->value());
 
     tree->scene = new QGraphicsScene(this);
     ui->graphicsView->setScene(tree->scene);
-    qInfo(logInfo()) << "UI set up";
+    qInfo(logInfo()) << "Файл UI установлен.";
 }
 
 MainWindow::~MainWindow()
@@ -34,7 +34,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::addElementClicked()
 {
-    qInfo(logInfo()) << "addElementButton clicked";
+    qInfo(logInfo()) << "Нажата кнопка добавить элемент.";
     Tree *tree = Tree::getPTree();
     tree->addElement(ui->addElementField->text().toInt()); //TODO: добавить валидацию
 }
@@ -55,3 +55,4 @@ void messageHandler(QtMsgType type, const QMessageLogContext &context, const QSt
     out << context.category << ": " << msg << Qt::endl; //записываем категориюи сообщение
     out.flush();    // Очищаем буферизированные данные
 }
+

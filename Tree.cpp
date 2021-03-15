@@ -16,7 +16,7 @@ Tree::Tree(QWidget *parent, int order) : QWidget(parent)
 
 Tree::~Tree()
 {
-    qInfo(logInfo()) << "Tree's destructor started";
+    qInfo(logInfo()) << "Вошли в деструктор дерева.";
     if(pTree != nullptr)
     {
         if(root != nullptr)
@@ -30,7 +30,7 @@ Tree::~Tree()
 
 void Tree::deletePage(TreePage *page) //рекуисивно освобождает память под страницу и все её потомки
 {
-    qInfo(logInfo()) << "Deleting page " + page->formElementsToString() + "and all its children";
+    qInfo(logInfo()) << "Удаляем страницу " + page->formElementsToString() + "и всех её потомков.";
     if(page != nullptr)
     {
         for(int i = 0; i < n * 2 + 1; i++)
@@ -63,27 +63,27 @@ Tree* Tree::getPTree()
 void Tree::addElement(int e) //добавить элемнент в дерево (с поиском страницы, куда добавить)
 {
     elementCount++;
-    qInfo(logInfo()) << "Adding element " + QString::number(e) + " to the tree";
+    qInfo(logInfo()) << "Добавляем элемент " + QString::number(e) + " в дерево.";
     if(root == nullptr) //если это первый элемент в дереве
     {
-        qInfo(logInfo()) << "That's the first element in the tree. Creating root page";
+        qInfo(logInfo()) << "Это первый элемент дерева. Создаём корневую страницу.";
         root = new TreePage(nullptr, n, nullptr); //создаём корневую страницу
         addElementToPage(e, root); //добавляем первый элемент
         recountNeededSpace(root);
     }
     else
     {
-        qInfo(logInfo()) << "Searching for a place to put that element";
+        qInfo(logInfo()) << "Ищем, куда добавить этот элемент";
         TreePage *ptr = root;
         while(ptr->descendantsCount != 0) //просматриваем, пока не находим лист
         {
             for(int i = 0; i < 2 * n; i++) //цикл по всем элементам страницы
             {
-                qDebug(logDebug()) << "Смотрим на " << i << "-ый элемент страницы" << ptr->formElementsToString();
                 if(ptr->elements[i] != -10000) //если этот элемент есть
                 {
                     if(e < ptr->elements[i])
                     {
+                        //Debug log
                         if(ptr->arrPDescendants[i] == nullptr)
                         {
                             qCritical(logCritical()) << "Пытается перейти на nullptr по индексу" << i;
@@ -94,12 +94,12 @@ void Tree::addElement(int e) //добавить элемнент в дерево
                                 qDebug(logDebug()) << "i = " << i << ":" << ptr->arrPDescendants[i]->formElementsToString();
                             }
                         }
-                        ptr = ptr->arrPDescendants[i]; //TODO: прокомментировать
-                        qDebug(logDebug()) << "Переходим на " << ptr->formElementsToString();
+                        ptr = ptr->arrPDescendants[i];
                         break;
                     }
                     if (ptr->elementsCount - 1 == i && e > ptr->elements[i]) //если нет следующего элемента в странице, а новый элемент больше последнего
                     {
+                        //Debug log
                         if(ptr->arrPDescendants[i] == nullptr)
                         {
                             qCritical(logCritical()) << "Пытается перейти на nullptr (2) по индексу" << i;
@@ -111,7 +111,6 @@ void Tree::addElement(int e) //добавить элемнент в дерево
                             }
                         }
                         ptr = ptr->arrPDescendants[ptr->elementsCount]; //тогда переходим к самому последнему потомку
-                        qDebug(logDebug()) << "Переходим на " << ptr->formElementsToString();
                         break;
                     }
                 }
@@ -140,14 +139,14 @@ void Tree::addElement(int e) //добавить элемнент в дерево
 
 int Tree::addElementToPage(int e, TreePage *pPage) //Добавление элемента на конкретную страницу
 {
-    qInfo(logInfo()) << "Adding element to the page " + pPage->formElementsToString();
+    qInfo(logInfo()) << "Добавляем элемент на страницу " + pPage->formElementsToString();
     pPage->elements[pPage->elementsCount++] = e; //Добавить элемент на страницу и увеличить кол-во элементов
     pPage->sort();
     for(int i = 0; i < pPage->elementsCount; i++)
     {
         if(e == pPage->elements[i])
         {
-            qInfo(logInfo()) << "Element added to the page at index " << i;
+            qInfo(logInfo()) << "Элемент добавлен на страницу по индексу" << i << ".";
             return i;
         }
     }
@@ -157,9 +156,7 @@ void Tree::restoreTree(TreePage *pPage) //восстанавливает сво�
 {
     if (pPage->elementsCount < 2*n + 1) return; //если для страницы выполняется свойство
 
-    qInfo(logInfo()) << "Page " << pPage->formElementsToString() << " has more than 2n elements. Restoring tree.";
-
-    qDebug(logDebug()) << "Parent page = " << ((pPage->pParentPage == nullptr) ? "nullptr" : pPage->pParentPage->formElementsToString());
+    qInfo(logInfo()) << "На странице " << pPage->formElementsToString() << " больше 2n элементов. Восстаналвиваем свойства дерева.";
 
     TreePage* newPage;
     if(pPage->pParentPage == nullptr) //если текущая страница - корень
@@ -170,7 +167,7 @@ void Tree::restoreTree(TreePage *pPage) //восстанавливает сво�
         root = newRoot;
 
         int middleElement = pPage->elements[n];
-        qInfo(logInfo()) << "Middle element is," << middleElement <<", adding it to the parent page" << newRoot->formElementsToString();
+        qInfo(logInfo()) << "Медианный элемент =" << middleElement <<", добавляем его на страницу-родитель" << newRoot->formElementsToString();
         addElementToPage(middleElement, newRoot);
         pPage->elements[n] = -10000;
         pPage->elementsCount--;
@@ -178,9 +175,6 @@ void Tree::restoreTree(TreePage *pPage) //восстанавливает сво�
         newRoot->arrPDescendants[0] = pPage;
         newRoot->arrPDescendants[1] = newPage;
         newRoot->descendantsCount = 2;
-
-        qDebug(logDebug()) << "Родитель newPage"<< newPage->formElementsToString() << "= " << ((newPage->pParentPage == nullptr) ? "nullptr" : newPage->pParentPage->formElementsToString());
-        qDebug(logDebug()) << "Родитель pPage "<< pPage->formElementsToString() << "= " << ((pPage->pParentPage == nullptr) ? "nullptr" : pPage->pParentPage->formElementsToString());
 
         for(int i = n + 1; i < 2 * n + 1; i++)
         {
@@ -194,10 +188,9 @@ void Tree::restoreTree(TreePage *pPage) //восстанавливает сво�
     {
         TreePage* pParent = pPage->pParentPage;
         newPage = new TreePage(nullptr, pPage->n, pParent);
-        qDebug(logDebug()) << "Родитель newpage "<< newPage->formElementsToString() << "= " << ((newPage->pParentPage == nullptr) ? "nullptr" : newPage->pParentPage->formElementsToString());
 
         int middleElement = pPage->elements[n];
-        qInfo(logInfo()) << "Middle element is," << middleElement <<", adding it to the parent page" << pParent->formElementsToString();
+        qInfo(logInfo()) << "Медианный элемент =" << middleElement <<", добавляем его на страницу-родитель" << pParent->formElementsToString();
         int index = addElementToPage(middleElement, pParent);
         pPage->elements[n] = -10000;
         pPage->elementsCount--;
@@ -211,7 +204,6 @@ void Tree::restoreTree(TreePage *pPage) //восстанавливает сво�
         }
 
         //добавляем новую страницу в массив потомков страницы-родителя
-        qDebug(logCritical()) << "Сравниваем newPage->elements[0] = " << newPage->elements[0] << "с" << pParent->elements[index];
         if(newPage->elements[0] > pParent->elements[index])
         {
             index++;
@@ -230,14 +222,13 @@ void Tree::restoreTree(TreePage *pPage) //восстанавливает сво�
     {
         if(pPage->descendantsCount > n + 1)
         {
-            qInfo(logInfo()) << "Делим потомки страницы";
+            qInfo(logInfo()) << "Делим потомки страницы.";
             for(int i = n + 2; i < 2 * n + 2; i++)
             {
                 if(pPage->arrPDescendants[i] != nullptr) //TODO: как-то исправить тут сравнение
                 {
                     for(int j = 0; j < newPage->elementsCount; j++)
                     {
-                        qDebug(logCritical()) << "Сравниваем newPage->elements[0] = " << newPage->elements[j] << "с" << pPage->arrPDescendants[i]->elements[0];
                         if(newPage->elements[j] > pPage->arrPDescendants[i]->elements[0])
                         {
                             pPage->arrPDescendants[i]->pParentPage = newPage;
@@ -258,37 +249,15 @@ void Tree::restoreTree(TreePage *pPage) //восстанавливает сво�
                         }
                         else
                         {
-                            //newPage->descendantsCount++;
+                            newPage->descendantsCount++;
                             newPage->arrPDescendants[j] = nullptr;
-                            qDebug(logCritical()) << "<= -> пропускаем, j = " << j;
+                            //qDebug(logCritical()) << "<= -> пропускаем, j = " << j;
                             continue;
                         }
                     }
                 }
             }
         }
-    }
-
-
-    qDebug(logDebug()) << "Потомки страницы pPage->pParentPage" << pPage->pParentPage->formElementsToString() << "по порядку:";
-    for(int i = 0; i < 2*n+1; i++)
-    {
-        if(pPage->pParentPage->arrPDescendants[i] == nullptr) continue;;
-        qDebug(logDebug()) << "i = " << i << ":" << pPage->pParentPage->arrPDescendants[i]->formElementsToString();
-    }
-
-    qDebug(logDebug()) << "Потомки страницы pPage" << pPage->formElementsToString() << "по порядку:";
-    for(int i = 0; i < 2*n+1; i++)
-    {
-        if(pPage->arrPDescendants[i] == nullptr) continue;;
-        qDebug(logDebug()) << "i = " << i << ":" << pPage->arrPDescendants[i]->formElementsToString();
-    }
-
-    qDebug(logDebug()) << "Потомки страницы newPage" << newPage->formElementsToString() << "по порядку:";
-    for(int i = 0; i < 2*n+1; i++)
-    {
-        if(newPage->arrPDescendants[i] == nullptr) continue;;
-        qDebug(logDebug()) << "i = " << i << ":" << newPage->arrPDescendants[i]->formElementsToString();
     }
 
      recountNeededSpace(newPage);
@@ -311,7 +280,7 @@ void Tree::deleteElement(int e)
 
 void Tree::repaintTree(TreePage *pPage, int x, int y)
 {
-    qInfo(logInfo()) << "Repainting tree (page " << pPage->formElementsToString() << ")";
+    qInfo(logInfo()) << "Перерисовываем дерево (страница" << pPage->formElementsToString() << ").";
 
     if(pPage == nullptr) return;
 
@@ -324,7 +293,7 @@ void Tree::repaintTree(TreePage *pPage, int x, int y)
 
     int width = 25 + 6 * str.length();
     int height = 30;
-    qDebug(logDebug()) << "x = " << x << "; y = " << y << "; width = " << width << "; height = " << height;
+    //qDebug(logDebug()) << "x = " << x << "; y = " << y << "; width = " << width << "; height = " << height;
     QGraphicsRectItem *rectItem = new QGraphicsRectItem(x, y, width, height, nullptr);
     rectItem->setPen(QPen(Qt::black));
     rectItem->setBrush(QBrush(Qt::white));
