@@ -23,7 +23,8 @@ private:
     int addElementToPage(int, TreePage*); //добавление элемента на страницу, возвращает индекс элемента на странице
     void restoreTree(TreePage*); //восстанавливает свойство дерева, если на какой-то странице больше 2n элементов
 
-    void recountNeededSpace(TreePage* ptr);
+    void recountNeededSpace(TreePage*);
+    TreePage* recursiveSearch(TreePage*, int);
 public:
     QGraphicsScene *scene;
 
@@ -43,7 +44,7 @@ signals:
 public slots:
     void orderChanged(int newOrder);
     void addElement(int e);
-    void searchForElement(int e);
+    TreePage* searchForElement(int e);
     void deleteElement(int e);
 };
 

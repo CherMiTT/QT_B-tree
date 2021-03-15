@@ -24,10 +24,10 @@ private:
     TreePage **arrPDescendants; //массив указателей на потомков
     void sort();
 
-    QString formElementsToString(); //возвращает строку с элементами страницы, разделёнными пробелами
 public:
 
     explicit TreePage(QWidget *parent = nullptr, int order = 0, TreePage *pParentPage = nullptr);
+    QString formElementsToString(); //возвращает строку с элементами страницы, разделёнными пробелами
 
     friend class Tree;
 
