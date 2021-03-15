@@ -37,8 +37,19 @@ MainWindow::~MainWindow()
 void MainWindow::addElementClicked()
 {
     qInfo(logInfo()) << "Нажата кнопка добавить элемент.";
+    ui->statusLabel->setText("");
     Tree *tree = Tree::getPTree();
-    tree->addElement(ui->addElementField->text().toInt()); //TODO: добавить валидацию
+    int e = ui->addElementField->text().toInt();  //TODO: добавить валидацию
+    if(tree->searchForElement(e) == nullptr)
+    {
+        qInfo(logInfo()) << "Элемента" << e << "ещё нет в дереве.";
+        tree->addElement(e);
+    }
+    else
+    {
+        qInfo(logInfo()) << "Элемент" << e << "уже есть в дереве.";
+        ui->statusLabel->setText("Элемент уже есть в дереве.");
+    }
 }
 
 void MainWindow::searchElementClicked()
@@ -46,6 +57,14 @@ void MainWindow::searchElementClicked()
     qInfo(logInfo()) << "Нажата кнопка поиска элемента.";
     Tree* tree = Tree::getPTree();
     TreePage* result = tree->searchForElement(ui->searchElementField->text().toInt()); //TODO: добавить валидацию
+    if(result == nullptr)
+    {
+        ui->statusLabel->setText("Элемент не найден.");
+    }
+    else
+    {
+        ui->statusLabel->setText("Элемент найден на странице \n" + result->formElementsToString() + ".");
+    }
 }
 
 void messageHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg) //обработчик сообщений в лог
