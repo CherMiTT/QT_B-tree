@@ -210,7 +210,7 @@ void Tree::restoreTree(TreePage *pPage) //восстанавливает сво�
         }
 
         //смещаем все потомки на один индекс вправо и добавляем нового потомка
-        for(int i = pParent->descendantsCount - 1; i >= index + 1; i--) //TODO: исправить
+        for(int i = pParent->descendantsCount - 1; i >= index; i--) //TODO: исправить
         {
             pParent->arrPDescendants[i+1] = pParent->arrPDescendants[i];
         }
