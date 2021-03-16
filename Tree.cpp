@@ -334,6 +334,8 @@ void Tree::repaintTree(TreePage *pPage, int x, int y)
 {
     qInfo(logInfo()) << "Перерисовываем дерево (страница" << pPage->formElementsToString() << ").";
 
+    pPage->x = x;
+    pPage->y = y;
     if(pPage == nullptr) return;
 
     QString str = pPage->formElementsToString();
@@ -343,17 +345,21 @@ void Tree::repaintTree(TreePage *pPage, int x, int y)
         scene->clear();
     }
 
-    int width = 25 + 6 * str.length();
+    int width = 12 + 4 * str.length(); //TODO: doesn't work for long numbers
     int height = 30;
-    //qDebug(logDebug()) << "x = " << x << "; y = " << y << "; width = " << width << "; height = " << height;
     QGraphicsRectItem *rectItem = new QGraphicsRectItem(x, y, width, height, nullptr);
     rectItem->setPen(QPen(Qt::black));
     rectItem->setBrush(QBrush(Qt::white));
     scene->addItem(rectItem);
 
-    QGraphicsTextItem *textItem = new QGraphicsTextItem(str, rectItem);
+    QGraphicsTextItem* textItem = new QGraphicsTextItem(str, rectItem);
     textItem->setPos(x, y);
     textItem->setTextWidth(textItem->boundingRect().width());
+
+    if(pPage->pParentPage != nullptr)
+    {
+        QGraphicsLineItem* lineItem = new QGraphicsLineItem(x + width/2, y, pPage->pParentPage->x, pPage->pParentPage->y + 30,rectItem);
+    }
 
     int offsetLeft = 0;
     for(int i = 0; i < 2 * n + 1; i++)
