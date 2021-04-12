@@ -19,6 +19,8 @@ class Tree : public QWidget
 {
     Q_OBJECT
 public:
+    QGraphicsScene* scene; //! Графическая сцена, на которой рисуем дерево
+
     explicit Tree(QWidget *parent = nullptr, size_t n = 0); //! Конструктор
 
 signals:
@@ -34,13 +36,14 @@ private:
     size_t n; //! Порядок дерева
     TreePage* root; //! Корень дерева
     size_t elementCount; //! Количество элементов в дереве
-    QGraphicsScene* scene; //! Графическая сцена, на которой рисуем дерево
 
 
     int addElementToPage(TreePage*, int);
     TreePage* findPageWhereAdd(int e);
     void restoreTree(TreePage*);
     int splitPage(TreePage&, TreePage&);
+    void recountNeededSpace(TreePage*);
+    void repaintTree(TreePage*, int, int);
 };
 
 #endif // TREE_H

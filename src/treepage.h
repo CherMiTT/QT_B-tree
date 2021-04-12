@@ -40,8 +40,10 @@ private:
     size_t descendantsCount; //! Количество потомков
     TreePage* parentPage; //! Родительская страница
     QList<int> elements; //! Список элементов страницы
-    QList<TreePage*> descendands; //! Список дочерних страниц
+    QList<TreePage*> descendants; //! Список дочерних страниц
 
+    int needsSpace; //! Сколько пространства странице нужно на экране
+    QGraphicsRectItem *rect; //! Прямоугольник страницы на экране
 };
 
 #endif // TREEPAGE_H

@@ -23,11 +23,14 @@ MainWindow::MainWindow(QWidget *parent)
 
     qInfo(logInfo()) << "Приложение запущено, логгер успешно запущен.";
     ui->setupUi(this);
-    tree = nullptr;
+    tree = new Tree(nullptr, 2); //TODO: изменить порядок на вводимый
 
     //TODO: добавить QValidator-ы для полей ввода
     connect(ui->addElementButton, &QPushButton::clicked, this, &MainWindow::addElementClicked);
     connect(ui->searchElementButton, &QPushButton::clicked, this, &MainWindow::searchElementClicked);
+
+    tree->scene = new QGraphicsScene(this);
+    ui->graphicsView->setScene(tree->scene);
 }
 
 MainWindow::~MainWindow()
@@ -43,8 +46,6 @@ void MainWindow::addElementClicked()
     qInfo(logInfo()) << "Нажата кнопка добавить элемент.";
     ui->statusLabel->setText("");
 
-    if(tree == nullptr)
-        tree = new Tree(nullptr, 2); //TODO: изменить порядок на вводимый
     int e = ui->addElementField->text().toInt();  //TODO: добавить валидацию
 
     if(tree->searchForElement(e) == nullptr)

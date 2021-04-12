@@ -21,7 +21,9 @@ TreePage::TreePage(QWidget *parent, TreePage* parentPage, size_t n) : QWidget(pa
     descendantsCount = 0;
     this->parentPage = parentPage;
     elements.reserve(2 * n + 1); //На один больше, чем надо
-    descendands.reserve(2 * n + 2); //На один больше, чем надо
+    descendants.reserve(2 * n + 2); //На один больше, чем надо
+
+    needsSpace = 100; //TODO: изменить
 }
 
 /*!
