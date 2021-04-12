@@ -3,35 +3,34 @@
 
 // add necessary includes here
 
-class TestTree : public QObject
+class testTree : public QObject
 {
     Q_OBJECT
 
 public:
-    TestTree();
-    ~TestTree();
+    testTree();
+    ~testTree();
 
 private slots:
     void test_case1();
 
 };
 
-TestTree::TestTree()
+testTree::testTree()
 {
 
 }
 
-TestTree::~TestTree()
+testTree::~testTree()
 {
 
 }
 
-
-void TestTree::test_case1()
+void testTree::test_case1()
 {
 
 }
 
-QTEST_MAIN(TestTree)
+QTEST_MAIN(testTree)
 
 #include "tst_testtree.moc"
