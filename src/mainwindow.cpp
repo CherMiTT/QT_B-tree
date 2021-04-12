@@ -66,6 +66,16 @@ void MainWindow::addElementClicked()
  */
 void MainWindow::searchElementClicked()
 {
+    qInfo(logInfo()) << "Нажата кнопка поиска элемента.";
+    TreePage* result = tree->searchForElement(ui->searchElementField->text().toInt()); //TODO: добавить валидацию
+    if(result == nullptr)
+    {
+        ui->statusLabel->setText("Элемент не найден.");
+    }
+    else
+    {
+        ui->statusLabel->setText("Элемент найден на странице \n" + result->formElementsToString() + ".");
+    }
 }
 
 void messageHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg) //обработчик сообщений в лог

@@ -22,6 +22,7 @@ public:
     QGraphicsScene* scene; //! Графическая сцена, на которой рисуем дерево
 
     explicit Tree(QWidget *parent = nullptr, size_t n = 0); //! Конструктор
+    TreePage* recursiveSearch(TreePage*, int);
 
 signals:
     void rebuildTree(); //! Сигнал о том, что нужно перестраивать всё дерево с нуля

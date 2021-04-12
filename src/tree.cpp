@@ -20,6 +20,43 @@ Tree::Tree(QWidget *parent, size_t n) : QWidget(parent)
     elementCount = 0;
 }
 
+/*!
+ * \brief Ищет элемент e, рекурсивно просматривая потомков страницы page
+ * \param page - текущая страница
+ * \param e - искомый элемент
+ * \return nullptr, если не нашло e, указатель на станицу, если нашло
+ */
+TreePage *Tree::recursiveSearch(TreePage* page, int e)
+{
+    qInfo(logInfo()) << "Просматриваем страницу" << page->formElementsToString() << ".";
+    if(page->descendantsCount != page->descendants.count(nullptr)) //если просматриваем не лист
+    {
+        qInfo(logInfo()) << "Это не лист.";
+        for(int i = 0; i < page->elementsCount; i++)
+        {
+            if(e == page->elements[i]) return page;
+            if(e < page->elements[i])
+            {
+                return page->descendants[i] == nullptr ? nullptr : recursiveSearch(page->descendants[i], e);
+            }
+            if(i == page->elementsCount - 1)
+            {
+                return page->descendants[i + 1] == nullptr ? nullptr : recursiveSearch(page->descendants[i + 1], e);
+            }
+        }
+    }
+    else //если просматриваем лист
+    {
+        qInfo(logInfo()) << "Это лист.";
+        for(int i = 0; i < page->elementsCount; i++)
+        {
+            if(e == page->elements[i]) return page;
+        }
+        return nullptr;
+    }
+
+}
+
 
 /*!
  * \brief Слот, вызываемый при изменении порядка дерева.
@@ -81,8 +118,24 @@ void Tree::addElement(int e)
  */
 TreePage* Tree::searchForElement(int e)
 {
-    //TODO: сейчас тут заглушка, реализовать
-    return nullptr;
+    qInfo(logInfo()) << "Ищем элемент " + QString::number(e) << ".";
+    if(root == nullptr)
+    {
+        qInfo(logInfo()) << "Дерево ещё не создано. Элемента нет.";
+        return nullptr;
+    }
+
+    TreePage* result = recursiveSearch(root, e);
+    if(result == nullptr)
+    {
+        qInfo(logInfo()) << "Элемент не найден.";
+    }
+    else
+    {
+        qInfo(logInfo()) << "Элемент найден на странице" << result->formElementsToString() << ".";
+    }
+    return result;
+
 }
 
 /*!
@@ -218,7 +271,25 @@ int Tree::splitPage(TreePage& page1, TreePage& page2)
     page2.descendantsCount = page2.descendants.size();
     page1.descendants.remove(n + 1, n + 1);
     page1.descendantsCount = page1.descendants.size();
+    for(auto i = page2.descendants.begin(); i != page2.descendants.end(); i++)
+    {
+        if(*i == nullptr) continue;
+        (*i)->parentPage = &page2;
+    }
 
+    /*qDebug(logDebug()) << "У страницы " << page1.formElementsToString() << "потомки:";
+    for(auto i = page1.descendants.constBegin(); i != page1.descendants.constEnd(); i++)
+    {
+        if(*i == nullptr) continue;
+        qDebug() << (*i)->formElementsToString();
+    }
+    qDebug(logDebug()) << "У страницы " << page2.formElementsToString() << "потомки:";
+    for(auto i = page2.descendants.constBegin(); i != page2.descendants.constEnd(); i++)
+    {
+        if(*i == nullptr) continue;
+        qDebug() << (*i)->formElementsToString();
+    }
+    qDebug(logDebug());*/
     qInfo(logInfo()) << "Получились страницы " << page1.formElementsToString() << " и " << page2.formElementsToString();
     qInfo(logInfo()) << "Средний элемент = " << middle;
     return middle;
@@ -285,7 +356,8 @@ void Tree::repaintTree(TreePage* page, int x, int y)
         QGraphicsLineItem *lineItem = new QGraphicsLineItem(rectItem->boundingRect().center().x(),
                                                             rectItem->boundingRect().top(),
                                                             page->parentPage->rect->boundingRect().center().x(),
-                                                            page->parentPage->rect->boundingRect().bottom(), rectItem);
+                                                            page->parentPage->rect->boundingRect().bottom());
+        scene->addItem(lineItem);
     }
 
     int offsetLeft = 0;
@@ -294,7 +366,6 @@ void Tree::repaintTree(TreePage* page, int x, int y)
         if(*i == nullptr) continue;
         repaintTree(*i, x - page->needsSpace/2 + offsetLeft, y + 100);
         offsetLeft += (*i)->needsSpace;
-        //scene->addLine(x, y + 30, x - page->needsSpace/2 + offsetLeft, y + 100);
     }
 
 }
