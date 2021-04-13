@@ -25,9 +25,14 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
     tree = new Tree(nullptr, 2); //TODO: изменить порядок на вводимый
 
-    //TODO: добавить QValidator-ы для полей ввода
+    QIntValidator *numbersValidator = new QIntValidator(0, 999, this);
+    ui->addElementField->setValidator(numbersValidator);
+    ui->searchElementField->setValidator(numbersValidator);
+    ui->deleteElementField->setValidator(numbersValidator);
+
     connect(ui->addElementButton, &QPushButton::clicked, this, &MainWindow::addElementClicked);
     connect(ui->searchElementButton, &QPushButton::clicked, this, &MainWindow::searchElementClicked);
+    connect(ui->deleteElementButton, &QPushButton::clicked, this, &MainWindow::deleteElement);
 
     tree->scene = new QGraphicsScene(this);
     ui->graphicsView->setScene(tree->scene);
@@ -46,7 +51,7 @@ void MainWindow::addElementClicked()
     qInfo(logInfo()) << "Нажата кнопка добавить элемент.";
     ui->statusLabel->setText("");
 
-    int e = ui->addElementField->text().toInt();  //TODO: добавить валидацию
+    int e = ui->addElementField->text().toInt();
 
     if(tree->searchForElement(e) == nullptr)
     {
@@ -76,6 +81,30 @@ void MainWindow::searchElementClicked()
     {
         ui->statusLabel->setText("Элемент найден на странице \n" + result->formElementsToString() + ".");
     }
+}
+
+/*!
+ * \brief Слот, вызываемый при клике по кнопке "Удалить элемент"
+ */
+void MainWindow::deleteElement()
+{
+    qInfo(logInfo()) << "Нажата кнопка удалить элемент.";
+    ui->statusLabel->setText("");
+
+    int e = ui->deleteElementField->text().toInt();
+
+    TreePage* page = tree->searchForElement(e);
+    if(page == nullptr)
+    {
+        qInfo(logInfo()) << "Элемента" << e << " нет в дереве.";
+        ui->statusLabel->setText("Элемента нет в дереве.");
+    }
+    else
+    {
+        qInfo(logInfo()) << "Элемент" << e << " есть в дереве на странице" << page->formElementsToString();
+        tree->deleteElement(page, e);
+    }
+
 }
 
 void messageHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg) //обработчик сообщений в лог

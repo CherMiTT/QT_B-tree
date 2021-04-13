@@ -32,16 +32,17 @@ TreePage *Tree::recursiveSearch(TreePage* page, int e)
     if(page->descendantsCount != page->descendants.count(nullptr)) //если просматриваем не лист
     {
         qInfo(logInfo()) << "Это не лист.";
-        for(int i = 0; i < page->elementsCount; i++)
+        //for(int i = 0; i < page->elementsCount; i++)
+        for(auto i : page->elements)
         {
-            if(e == page->elements[i]) return page;
-            if(e < page->elements[i])
+            if(e == i) return page;
+            if(e < i)
             {
-                return page->descendants[i] == nullptr ? nullptr : recursiveSearch(page->descendants[i], e);
+                return page->descendants[page->elements.indexOf(i)] == nullptr ? nullptr : recursiveSearch(page->descendants[page->elements.indexOf(i)], e);
             }
-            if(i == page->elementsCount - 1)
+            if(i == page->elements.last())
             {
-                return page->descendants[i + 1] == nullptr ? nullptr : recursiveSearch(page->descendants[i + 1], e);
+                return page->descendants.last() == nullptr ? nullptr : recursiveSearch(page->descendants.last(), e);
             }
         }
     }
@@ -139,6 +140,26 @@ TreePage* Tree::searchForElement(int e)
 }
 
 /*!
+ * \brief Слот, вызываемый для удаления элемента из дерева
+ * \param page - страница, на которой находится элемент e
+ * \param e - удаляемый элемент
+ */
+void Tree::deleteElement(TreePage* page, int e)
+{
+    if(page->descendantsCount == page->descendants.count(nullptr)) //Если лист
+    {
+        qInfo(logInfo()) << "Страница " << page->formElementsToString() << " является листом";
+        deleteFromLeaf(page, e);
+    }
+    else
+    {
+        qInfo(logInfo()) << "Страница " << page->formElementsToString() << "не является листом";
+        deleteFromNonLeaf(page, e);
+    }
+    repaintTree(root, 0, 0);
+}
+
+/*!
  * \brief Добавляет элемент e на страницу, проверка свойств не производится
  * \param page - страница, на которую добавляем
  * \param e - элемент, который добавляем
@@ -161,7 +182,8 @@ int Tree::addElementToPage(TreePage *page, int e)
     }
     else
     {
-        page->descendants.insert(index + 1, nullptr);
+        //page->descendants.insert(index, nullptr);
+        page->descendants.push_back(nullptr); //TODO: проверить место
         page->descendantsCount++;
     }
 
@@ -224,7 +246,9 @@ void Tree::restoreTree(TreePage* page)
         newRoot->elementsCount = 1;
         root = newRoot;
         qInfo(logInfo()) << "Теперь корневая страница: " <<
-                            root->formElementsToString() << ", её потомки: " << page->formElementsToString() << " и " << newPage->formElementsToString();
+                            root->formElementsToString() << ", её потомки: " << root->descendants.indexOf(page) << ":"
+                            << page->formElementsToString() << " и " <<  root->descendants.indexOf(newPage) << ":"
+                            << newPage->formElementsToString();
     }
     else //Если делили не корень
     {
@@ -232,13 +256,14 @@ void Tree::restoreTree(TreePage* page)
         newPage->parentPage = parent;
         int index = addElementToPage(parent, middle);
         parent->descendants.emplace(index + 1, newPage);
+        //parent->descendants.insert(index + 1, newPage);
         qInfo(logInfo()) << "Родитель этой страницы теперь: " << parent->formElementsToString();
 
         qDebug(logDebug()) << "Потомки этого родителя:";
         for(auto i = parent->descendants.constBegin(); i != parent->descendants.constEnd(); i++)
         {
             if(*i == nullptr) continue;
-            qDebug(logDebug()) << (*i)->formElementsToString();
+            qDebug(logDebug()) << "Индекс = " << parent->descendants.indexOf(*i) << ": " << (*i)->formElementsToString();
         }
     }
     recountNeededSpace(page);
@@ -293,6 +318,40 @@ int Tree::splitPage(TreePage& page1, TreePage& page2)
     qInfo(logInfo()) << "Получились страницы " << page1.formElementsToString() << " и " << page2.formElementsToString();
     qInfo(logInfo()) << "Средний элемент = " << middle;
     return middle;
+}
+
+/*!
+ * \brief Функция удаления элемента со страницы-листа
+ * \param page - страница, с которой удаляем
+ * \param e - удаляемый элемень
+ */
+void Tree::deleteFromLeaf(TreePage* page, int e)
+{
+    qInfo(logInfo()) << "На странице " << page->formElementsToString() << " " << page->elementsCount << "элементов";
+
+    if(page == root)
+    {
+        qInfo(logInfo()) << "Страница является корнем дерева";
+        page->elements.remove(page->elements.indexOf(e));
+        page->elementsCount -= 1;
+        page->descendants.removeLast();
+        page->descendantsCount -= 1;
+        qInfo(logInfo()) << "Элемент удалён из корня";
+    }
+    else
+    {
+        qInfo(logInfo()) << "Страница не является корнем дерева";
+    }
+}
+
+/*!
+ * \brief Функция удаления элемента со страницы, которая не является листом
+ * \param page - страница, с которой удаляем
+ * \param e - удаляемый элемень
+ */
+void Tree::deleteFromNonLeaf(TreePage* page, int e)
+{
+
 }
 
 /*!
