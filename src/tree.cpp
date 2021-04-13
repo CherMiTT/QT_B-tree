@@ -256,7 +256,13 @@ void Tree::restoreTree(TreePage* page)
         newPage->parentPage = parent;
         int index = addElementToPage(parent, middle);
         parent->descendants.emplace(index + 1, newPage);
-        //parent->descendants.insert(index + 1, newPage);
+
+        /*if(parent->descendants.at(index + 2) == nullptr)
+        {
+            parent->descendants.remove(index + 2);
+        }*/
+        parent->descendants.removeAll(nullptr);
+
         qInfo(logInfo()) << "Родитель этой страницы теперь: " << parent->formElementsToString();
 
         qDebug(logDebug()) << "Потомки этого родителя:";
@@ -334,6 +340,7 @@ void Tree::deleteFromLeaf(TreePage* page, int e)
         qInfo(logInfo()) << "Страница является корнем дерева";
         page->elements.remove(page->elements.indexOf(e));
         page->elementsCount -= 1;
+        //TODO: проверить, надо ли удалять потомка и если да, то где потом добавлять
         page->descendants.removeLast();
         page->descendantsCount -= 1;
         qInfo(logInfo()) << "Элемент удалён из корня";
@@ -341,8 +348,185 @@ void Tree::deleteFromLeaf(TreePage* page, int e)
     else
     {
         qInfo(logInfo()) << "Страница не является корнем дерева";
+        page->elements.remove(page->elements.indexOf(e));
+        page->elementsCount -= 1;
+        page->descendants.removeLast();
+        page->descendantsCount -= 1;
+        qInfo(logInfo()) << "Элемент удалён из листа";
+        qInfo(logInfo()) << "В листе осталось " << page->elementsCount << "элементов";
+        if(page->elementsCount >= n)
+        {
+            qInfo(logInfo()) << "Выполняются свойства дерева, элемент успешно удалён";
+            return;
+        }
+        else
+        {
+            qInfo(logInfo()) << "В листе" << page->formElementsToString() << " теперь < n элементов, нарушено свойство.";
+            repairUnderflow(page);
+        }
     }
 }
+
+/*!
+ * \brief Восстанавливает свойства дерева, если на странице < n элементов
+ * \param page - страница с нарушенным свойством
+ */
+void Tree::repairUnderflow(TreePage *page)
+{
+    if(page->descendantsCount == page->descendants.count(nullptr)) //Если лист
+    {
+        //Ищем соседнюю страницу
+        //Если текущий лист самый правый, то возьмём левую. Если нет, то правую
+        bool right;
+        TreePage* neighbor;
+        int parentSeparator = findNeighborPage(page, neighbor, right);
+
+        qInfo(logInfo()) << "Наш лист " << page->formElementsToString() <<
+                            "; взяли его соседа " << neighbor->formElementsToString() <<
+                            "; в родительской странице их разделяет элемент" << parentSeparator;
+
+        if(neighbor->elementsCount == n) //Если из соседа нельзя удалить элементы, не нарушая свойства
+        {
+            //Сливаем текущий лист и соседа
+            mergePages(page, neighbor, parentSeparator, right);
+        }
+        else //Балансируем текущий лист и соседа
+        {
+            balancePages(page, neighbor, parentSeparator, right);
+        }
+    }
+    //TODO: else для не листа
+
+}
+
+int Tree::findNeighborPage(TreePage* page, TreePage* neighbor, bool& right)
+{
+    TreePage* parent = page->parentPage;
+    int parentSeparator;
+    if(parent->descendants.endsWith(page)) //Если текущий лист самый правый
+    {
+        neighbor = *(parent->descendants.cend() - 2); //Берём левого соседа, предпоследний потомок родителя
+        parentSeparator = parent->elements.last(); //Ключ в родительской странице между page и neibor
+        right = false;
+    }
+    else
+    {
+        int index = parent->descendants.indexOf(page); //Индекс листа в массиве потомков
+        neighbor = parent->descendants.at(index + 1); //Берём правого соседа
+        parentSeparator = parent->elements.at(index);
+        right = true;
+    }
+    return parentSeparator;
+}
+
+/*!
+ * \brief Балансирует количество элементов между страницами
+ * \param page1 - первая страница
+ * \param page2 - правая страница
+ * \param parentSeparator - разделитель в родительской странице между страницами
+ * \param right - true, если page2 справа от page1
+ */
+void Tree::balancePages(TreePage* page1, TreePage* page2, int parentSeparator, bool right)
+{
+    //TODO: тут не реализована балансировка, сделать как у Вирта
+    qInfo(logInfo()) << "Балансируем страницы";
+    if(right)
+    {
+        page1->elements.push_back(parentSeparator);
+        page1->elementsCount += 1;
+        page1->parentPage->elements.replace(page1->parentPage->elements.indexOf(parentSeparator),
+                                            page2->elements.first());
+        deleteElement(page2, page2->elements.first());
+    }
+    else
+    {
+        page1->elements.prepend(parentSeparator);
+        page1->elementsCount += 1;
+        page1->parentPage->elements.replace(page1->parentPage->elements.indexOf(parentSeparator),
+                                            page2->elements.last());
+        deleteElement(page2, page2->elements.last());
+    }
+    qInfo(logInfo()) << "Балансировка страниц завершена, в итоге наша страница: " <<
+                        page1->formElementsToString() << "; соседняя страница: " <<
+                        page2->formElementsToString() << "; родительская страница: " <<
+                        page1->parentPage->formElementsToString();
+}
+
+/*!
+ * \brief Сливает две страницы и разделитель между ними в родительской странице
+ * \param page1 - первая страница, в неё сольётся
+ * \param page2 - вторая страница, её удаляем
+ * \param parentSeparator - разделитель в родительской странице между страницами
+ * \param right - right - true, если page2 справа от page1
+ */
+void Tree::mergePages(TreePage* page1, TreePage* page2, int parentSeparator, bool right)
+{
+    qInfo(logInfo()) << "В соседней странице слишком мало элементов, поэтому сливаем страницы";
+    //Тогда надо сделать новый корень
+    if(right)
+    {
+        page1->elements.push_back(parentSeparator);
+        page1->elements += page2->elements;
+        //TODO: проверить с потомками
+        page1->descendants += page2->descendants;
+    }
+    else
+    {
+        page1->elements.push_front(parentSeparator);
+        for(auto i = page2->elements.rbegin(); i != page2->elements.rend(); i++)
+        {
+            page1->elements.push_front(*i);
+        }
+        //TODO: проверить с потомками
+        for(auto i = page2->descendants.rbegin(); i != page2->descendants.rend(); i++)
+        {
+            page1->descendants.push_front(*i);
+        }
+    }
+
+    page1->elementsCount = page1->elements.size();
+    //TODO: проверить с потомками
+    page1->descendantsCount = page1->descendants.size();
+
+    page1->parentPage->elements.removeAt(page1->parentPage->elements.indexOf(parentSeparator));
+    page1->parentPage->elementsCount -= 1;
+    page1->parentPage->descendants.removeAt(page1->parentPage->descendants.indexOf(page2));
+    page1->parentPage->descendantsCount -= 1;
+    delete page2;
+
+    if(page1->descendants.isEmpty())
+    {
+        for(int i = 0; i < page1->elementsCount + 1; i++)
+        {
+            page1->descendants.push_back(nullptr);
+        }
+        page1->descendantsCount = page1->elementsCount + 1;
+    }
+
+    if(page1->parentPage->elementsCount == 0) //Если удаляем родительский элемент
+    {
+        if(page1->parentPage == root)
+        {
+            delete root;
+            page1->parentPage = nullptr;
+            root = page1;
+            for(auto i = root->descendants.begin(); i != root->descendants.end(); i++)
+            {
+                if(*i == nullptr) continue;
+                (*i)->parentPage = root;
+            }
+        }
+        else
+        {
+            auto ptr = page1->parentPage;
+            auto parent = ptr->parentPage;
+            page1->parentPage = parent;
+            parent->descendants.replace(parent->descendants.indexOf(ptr), page1);
+            delete ptr; //TODO: проверить
+        }
+    }
+}
+
 
 /*!
  * \brief Функция удаления элемента со страницы, которая не является листом
@@ -351,7 +535,14 @@ void Tree::deleteFromLeaf(TreePage* page, int e)
  */
 void Tree::deleteFromNonLeaf(TreePage* page, int e)
 {
+    int index = page->elements.indexOf(e);
+    auto descendant = page->descendants.at(index + 1); //Правый потомок, удаляем из него самый левый элемент
+    int tmp = descendant->elements.first();
+    page->elements.replace(index, tmp);
+    qDebug(logDebug()) << tmp;
+    deleteElement(descendant, tmp);
 
+    //TODO: балансировка
 }
 
 /*!

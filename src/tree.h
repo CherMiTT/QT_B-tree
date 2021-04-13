@@ -34,6 +34,7 @@ public slots:
     TreePage* searchForElement(int e);
     void deleteElement(TreePage* page, int e);
 
+
 private:
     size_t n; //! Порядок дерева
     TreePage* root; //! Корень дерева
@@ -46,6 +47,10 @@ private:
     int splitPage(TreePage&, TreePage&);
 
     void deleteFromLeaf(TreePage* page, int e);
+    void repairUnderflow(TreePage* page);
+    void balancePages(TreePage* page1, TreePage* page2, int parentSeparator, bool right);
+    void mergePages(TreePage* page1, TreePage* page2, int parentSeparator, bool right);
+    int findNeighborPage(TreePage* page, TreePage* neighbor, bool& right);
     void deleteFromNonLeaf(TreePage* page, int e);
     void recountNeededSpace(TreePage*);
     void repaintTree(TreePage*, int, int);
