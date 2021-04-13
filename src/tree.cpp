@@ -379,7 +379,21 @@ void Tree::repairUnderflow(TreePage *page)
         //Если текущий лист самый правый, то возьмём левую. Если нет, то правую
         bool right;
         TreePage* neighbor;
-        int parentSeparator = findNeighborPage(page, neighbor, right);
+        TreePage* parent = page->parentPage;
+        int parentSeparator;
+        if(parent->descendants.endsWith(page)) //Если текущий лист самый правый
+        {
+            neighbor = *(parent->descendants.cend() - 2); //Берём левого соседа, предпоследний потомок родителя
+            parentSeparator = parent->elements.last(); //Ключ в родительской странице между page и neibor
+            right = false;
+        }
+        else
+        {
+            int index = parent->descendants.indexOf(page); //Индекс листа в массиве потомков
+            neighbor = parent->descendants.at(index + 1); //Берём правого соседа
+            parentSeparator = parent->elements.at(index);
+            right = true;
+        }
 
         qInfo(logInfo()) << "Наш лист " << page->formElementsToString() <<
                             "; взяли его соседа " << neighbor->formElementsToString() <<
@@ -399,7 +413,7 @@ void Tree::repairUnderflow(TreePage *page)
 
 }
 
-int Tree::findNeighborPage(TreePage* page, TreePage* neighbor, bool& right)
+/*int Tree::findNeighborPage(TreePage* page, TreePage* neighbor, bool& right)
 {
     TreePage* parent = page->parentPage;
     int parentSeparator;
@@ -417,7 +431,7 @@ int Tree::findNeighborPage(TreePage* page, TreePage* neighbor, bool& right)
         right = true;
     }
     return parentSeparator;
-}
+}*/
 
 /*!
  * \brief Балансирует количество элементов между страницами
