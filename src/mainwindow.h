@@ -13,6 +13,7 @@
 #include <QDateTime>
 #include <QDebug>
 #include <QFile>
+#include <QIntValidator>
 
 #include "tree.h"
 
@@ -36,6 +37,6 @@ private:
 private slots:
     void addElementClicked();
     void searchElementClicked();
-
+    void deleteElement();
 };
 #endif // MAINWINDOW_H
